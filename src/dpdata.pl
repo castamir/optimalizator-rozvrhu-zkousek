@@ -86,7 +86,7 @@ init_conflicts:-
 	addsubject("FYO", 2, 50),
 	addsubject("GIS", 2, 27),
 	addsubject("GJA", 2, 29),
-	/*addsubject("KKO", 2, 100),
+	addsubject("KKO", 2, 100),
 	addsubject("KRY", 2, 126),
 	addsubject("MPR", 3, 60),
 	addsubject("MUL", 2, 54),
@@ -102,7 +102,7 @@ init_conflicts:-
 	addsubject("VNV", 2, 35),
 	addsubject("WAP", 2, 129),
 	addsubject("ZPO", 2, 93),
-	addsubject("ZRE", 2, 60),*/
+	addsubject("ZRE", 2, 60),
 
 	assert(fixed_exam("IMA", 1, "2015-05-18", 12, 3, 546)),
 	assert(fixed_exam("IMA", 2, "2015-06-01", 12, 3, 546)),
