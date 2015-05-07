@@ -3,10 +3,12 @@
 pocet_procesu=1
 max_penalizace=100
 min_penalizace=0
+timeout=20  # 20* 30sec = 600sec = 10min
 
 printf "Pocet procesu [$pocet_procesu]: " ; read -r p ; p=`echo $p | grep "^[1-9]\+[0-9]*$"`
 printf "Minimalni penalizace [$min_penalizace]: " ; read -r mip ; mip=`echo $mip | grep "^[1-9]\+[0-9]*$"`
-printf "Maximalni (rozsah) penalizace [$max_penalizace]: " ; read -r mp ; mp=`echo $mp | grep "^[1-9]\+[0-9]*$"`
+#printf "Maximalni (rozsah) penalizace [$max_penalizace]: " ; read -r mp ; mp=`echo $mp | grep "^[1-9]\+[0-9]*$"`
+mp=$(($p-1))
 
 # oprava chybnych vstupu nebo nastaveni vychozich hodnot
 if [ "$p" = "" ]; then
@@ -42,18 +44,17 @@ do
 	cd ../..
 	sleep 5
 done
-echo "odstartovano: $NOW"
+echo "vsechny procesy spusteny"
 
 
 # uklid procesu
-finished=$p
-while [[ ( $finished -eq $p ) ]]; do
-	finished=0
+while [[ ( $timeout -gt "0" ) ]]; do
+	running=0
 	failed=0
 	for pid in ${pids[*]}
 	do
 		if [[ ( -d /proc/$pid ) && ( -z `grep zombie /proc/$pid/status` ) ]]; then
-			finished=$(($finished+1))
+			running=$(($running+1))
 		else
 			proces=${pidsp[$pid]}
 			dirname=test-$NOW/proces-$proces
@@ -62,14 +63,18 @@ while [[ ( $finished -eq $p ) ]]; do
 				echo proces $proces byl dokoncen
 			else
 				failed=$(($failed+1))
-				finished=$(($finished+1))
 			fi
 		fi
 	done
 	if [ $failed -eq $p ]; then
-		echo "Rozvrh nenalezen"
-	elif [ $finished -eq $p ]; then
+		echo "Tester skoncil neuspesne - rozvrh nenalezen"
+		timeout=0
+	elif [ $running -eq $p ]; then
 		sleep 30
+		timeout=$(($timeout-1))
+	else
+		echo "Vyprsel casovy limit - rozvrh nenalezen"
+		timeout=0
 	fi
 done
 
