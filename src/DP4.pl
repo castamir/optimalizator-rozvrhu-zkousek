@@ -74,8 +74,6 @@ expand_tupple([A, B, C], A, B, C).
 expand_tupple([A, B, C, D], A, B, C, D).
 expand_tupple([A, B, C, D, E], A, B, C, D, E).
 
-to_domain(E,X) :- X #= E.
-
 make_two_domains([H], H).
 make_two_domains([H | T], '\\/'(H, TDomain)) :-
 	make_two_domains(T, TDomain).
@@ -92,8 +90,6 @@ c_hours(Duration,Start1,Start2,Start3):-
 c_exam_to_exam(Schedule):-  
 	maplist(c_exam_to_exam(Schedule),Schedule),!.
 c_exam_to_exam(As,B):-
-	B = exam(Name,_,_,_,_,_,_,_),
-	message(Name),  
 	maplist(c_exam_to_exam_(B), As).
 c_exam_to_exam_(A,B):-
 	c5_same_day(A,B),
@@ -130,10 +126,14 @@ c4_exam_total_capacity(A,B,C,Capacity):-
 	A = exam(_,_,_,_,_,CapacityVar1,_,RoomListVar1),
 	B = exam(_,_,_,_,_,CapacityVar2,_,RoomListVar2),
 	C = exam(_,_,_,_,_,CapacityVar3,_,RoomListVar3), 
-	room_data(_, _, _, _, _, CapPairs, _, _, _),
+	room_data(_, _, _, _, _, CapPairs, CapSet, _, _),
+
 	CapacityVar1 #>= Capacity,
 	CapacityVar2 #>= Capacity,
 	CapacityVar3 #>= Capacity,
+
+	make_two_domains(CapSet, CapDomain),
+	[CapacityVar1,CapacityVar2,CapacityVar3] ins CapDomain,
 	
 	tuples_in([[RoomListVar1,CapacityVar1]],CapPairs),
 	tuples_in([[RoomListVar2,CapacityVar2]],CapPairs),
@@ -219,7 +219,6 @@ init_exams( TotalDays,
 	A = exam(Name,1,DayVar1,Start1,Duration,_,_,_),
 	B = exam(Name,2,DayVar2,Start2,Duration,_,_,_),
 	C = exam(Name,3,DayVar3,Start3,Duration,_,_,_),
-	message(Name),
 	c0_examination_period(DayVar1,DayVar2,DayVar3,TotalDays),
 	c1_days_between_exams(DayVar1,DayVar2,Name,1),
 	c1_days_between_exams(DayVar2,DayVar3,Name,2),
@@ -251,8 +250,7 @@ play(MinPenale, MaxPenale, _TimeLimit) :-
 		message("Celkova penalizace", Penale)
 		;
 		message("Rozvrh nenalezen")
-	),
-	!.
+	),!.
 
 % -Schedule: list of exams
 % -Penale: penalized quality of schedule	
@@ -285,7 +283,7 @@ find_schedule(_MinPenale, _MaxPenale, Schedule, Penale) :-
 	append([[Penale],Vars], AVars),
 	labeling([ff,min(Penale)],AVars),
 	/*find_solution(Schedule, Vars, MinPenale, MaxPenale, Penale),*/
-	message("Reseni nalezeno").
+	message("Reseni nalezeno"),!.
 	
 find_solution(Schedule, Vars, MinPenale, MaxPenale, Penale):-
 	message("Zkousim penale",MinPenale),
@@ -380,6 +378,7 @@ create_room_sets :-
 	powerset(RoomCapList, PSC),
 	maplist(sum_list, PSC, RoomCapPS),
 	max_member(MaxCap,RoomCapPS),
+	list_to_set(RoomCapPS,RoomCapPSSet),
 	length(RoomNameList, RoomCount),
 	
 	length(RoomNamePS, L),
@@ -396,7 +395,7 @@ create_room_sets :-
 	maplist(map_rooms_cap_count_pairs, RoomCapPS, II, CapPairs),
 
 	retractall(room_data(_, _, _, _, _, _, _, _, _)),
-	assert(room_data(RoomNamePS, RoomCapPS, MaxCap, RoomCount, Pairs, CapPairs, _,_,_)),
+	assert(room_data(RoomNamePS, RoomCapPS, MaxCap, RoomCount, Pairs, CapPairs, RoomCapPSSet,_,_)),
 	true.
 
 map_rooms_cap_count_pairs(Cap, I, [I,Cap]).

@@ -60,6 +60,7 @@ init_conflicts:-
 	setroomoff("D0206", "2015-06-12", [8,9,10,11,12,13,14,15,16,17,18]),
 	setroomoff("D0207", "2015-06-12", [8,9,10,11,12,13,14,15,16,17,18]), */
 
+	addsubject("PRL", 3, 188),
 	addsubject("IBS", 2, 28),
 	addsubject("IDS", 3, 530),
 	addsubject("IFY", 2, 497),
@@ -96,7 +97,6 @@ init_conflicts:-
 	addsubject("PES", 3, 50),
 	addsubject("PIS", 2, 35),
 	addsubject("POS", 3, 83),
-	addsubject("PRL", 3, 188),
 	addsubject("SNT", 2, 56),
 	addsubject("SPP", 2, 22),
 	addsubject("VNV", 2, 35),
